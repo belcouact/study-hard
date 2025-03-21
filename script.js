@@ -12,7 +12,7 @@ const clearBtn = document.getElementById('clear-btn');
 const platformConfig = {
     'ark': {
         apiKey: '3654c0c8-acfd-469e-a1a4-eca3a9a95a5e',
-        baseUrl: 'https://ark.cn-beijing.volces.com/api/v3/bots',
+        baseUrl: 'https://ark.cn-beijing.volces.com',
         botId: 'bot-20250301110252-phnr8'
     }
 };
@@ -48,7 +48,8 @@ function updateAPIStatus(status, message) {
 
 // Construct API URL
 function getApiUrl() {
-    return `${currentConfig.baseUrl}/${currentConfig.botId}/chat/completions`;
+    // Construct the URL according to the API's expected format
+    return `${currentConfig.baseUrl}/api/v3/bots/${currentConfig.botId}/chat/completions`;
 }
 
 // Check API connection
@@ -63,10 +64,13 @@ async function checkAPIConnection() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentConfig.apiKey}`
+                'Authorization': `Bearer ${currentConfig.apiKey}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
-                messages: [{ role: 'user', content: 'Test connection' }]
+                messages: [{ role: 'user', content: 'Test connection' }],
+                temperature: 0.7,
+                max_tokens: 2000
             })
         });
 
@@ -146,7 +150,8 @@ async function sendMessage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentConfig.apiKey}`
+                'Authorization': `Bearer ${currentConfig.apiKey}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 messages: [
@@ -160,6 +165,12 @@ async function sendMessage() {
         
         if (response.ok) {
             const data = await response.json();
+            console.log('API Response:', data); // Add logging for debugging
+            
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                throw new Error('Invalid response format from API');
+            }
+            
             const botMessage = data.choices[0].message.content;
             
             // Remove loading message
