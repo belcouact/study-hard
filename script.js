@@ -12,7 +12,7 @@ const clearBtn = document.getElementById('clear-btn');
 const platformConfig = {
     'ark': {
         apiKey: '3654c0c8-acfd-469e-a1a4-eca3a9a95a5e',
-        baseUrl: 'https://ark.cn-beijing.volces.com',
+        baseUrl: 'https://ark-ds.5525899.workers.dev',
         botId: 'bot-20250301110252-phnr8'
     }
 };
@@ -48,8 +48,8 @@ function updateAPIStatus(status, message) {
 
 // Construct API URL
 function getApiUrl() {
-    // Construct the URL according to the API's expected format
-    return `${currentConfig.baseUrl}/api/v3/bots/${currentConfig.botId}/chat/completions`;
+    // For the worker URL, we don't need the full path
+    return currentConfig.baseUrl;
 }
 
 // Check API connection
@@ -75,6 +75,8 @@ async function checkAPIConnection() {
         });
 
         console.log('API response status:', response.status);
+        const responseText = await response.text();
+        console.log('API response text:', responseText);
 
         if (response.ok) {
             console.log('API connection successful');
@@ -84,8 +86,7 @@ async function checkAPIConnection() {
             userInput.disabled = false;
             return true;
         } else {
-            const errorText = await response.text();
-            console.error('API Error Response:', errorText);
+            console.error('API Error Response:', responseText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
@@ -163,9 +164,17 @@ async function sendMessage() {
             })
         });
         
+        const responseText = await response.text();
+        console.log('API Response:', responseText);
+        
         if (response.ok) {
-            const data = await response.json();
-            console.log('API Response:', data); // Add logging for debugging
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Error parsing API response:', e);
+                throw new Error('Invalid JSON response from API');
+            }
             
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
                 throw new Error('Invalid response format from API');
@@ -183,8 +192,7 @@ async function sendMessage() {
             // Add to message history
             messageHistory.push({ role: 'assistant', content: botMessage });
         } else {
-            const errorText = await response.text();
-            console.error('API Error Response:', errorText);
+            console.error('API Error Response:', responseText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
