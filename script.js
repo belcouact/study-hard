@@ -12,9 +12,8 @@ const clearBtn = document.getElementById('clear-btn');
 const platformConfig = {
     'ark': {
         apiKey: '3654c0c8-acfd-469e-a1a4-eca3a9a95a5e',
-        // Instead of using localhost, we'll use a Cloudflare Worker URL
-        baseUrl: 'ark-ds.5525899.workers.dev', // You'll need to replace this with your Worker URL
-        model: 'bot-20250301110252-phnr8'
+        baseUrl: 'https://ark.cn-beijing.volces.com/api/v3/bots',
+        botId: 'bot-20250301110252-phnr8'
     }
 };
 
@@ -25,6 +24,7 @@ let messageHistory = [];
 
 // Initialize the app
 window.addEventListener('DOMContentLoaded', async () => {
+    console.log('Initializing application...');
     await checkAPIConnection();
     
     // Event listeners
@@ -46,21 +46,27 @@ function updateAPIStatus(status, message) {
     statusText.textContent = `API Status: ${message}`;
 }
 
+// Construct API URL
+function getApiUrl() {
+    return `${currentConfig.baseUrl}/${currentConfig.botId}/chat/completions`;
+}
+
 // Check API connection
 async function checkAPIConnection() {
     console.log('Checking API connection...');
     try {
-        updateAPIStatus('working', '正在连接...');
-        console.log('Sending test request to:', currentConfig.baseUrl);
+        updateAPIStatus('working', 'Connecting...');
+        const apiUrl = getApiUrl();
+        console.log('Sending test request to:', apiUrl);
         
-        const response = await fetch(currentConfig.baseUrl, {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentConfig.apiKey}`
             },
             body: JSON.stringify({
-                messages: [{ role: 'user', content: 'Hello' }]
+                messages: [{ role: 'user', content: 'Test connection' }]
             })
         });
 
@@ -68,16 +74,22 @@ async function checkAPIConnection() {
 
         if (response.ok) {
             console.log('API connection successful');
-            updateAPIStatus('connected', '已连接');
+            updateAPIStatus('connected', 'Connected');
             startBtn.disabled = false;
+            sendBtn.disabled = false;
+            userInput.disabled = false;
             return true;
         } else {
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
         console.error('API connection error:', error);
-        updateAPIStatus('error', '连接失败，请确保您的 API 配置正确');
+        updateAPIStatus('error', 'Connection failed. Check console for details.');
         startBtn.disabled = true;
+        sendBtn.disabled = true;
+        userInput.disabled = true;
         return false;
     }
 }
@@ -93,7 +105,7 @@ function startSession() {
         startBtn.textContent = 'End Session';
         
         // Add system message to UI
-        addMessageToChat('系统', '会话已开始。您可以开始提问了。', 'bot-message');
+        addMessageToChat('System', 'Session started. You can start asking questions.', 'bot-message');
     } else {
         sessionActive = false;
         userInput.disabled = true;
@@ -101,7 +113,7 @@ function startSession() {
         startBtn.textContent = 'Start Session';
         
         // Add system message to UI
-        addMessageToChat('系统', '会话已结束。', 'bot-message');
+        addMessageToChat('System', 'Session ended.', 'bot-message');
     }
 }
 
@@ -116,7 +128,7 @@ async function sendMessage() {
     if (!userMessage || !sessionActive) return;
     
     // Add user message to UI
-    addMessageToChat('用户', userMessage, 'user-message');
+    addMessageToChat('User', userMessage, 'user-message');
     userInput.value = '';
     
     // Add to message history
@@ -124,12 +136,13 @@ async function sendMessage() {
     
     // Show loading indicator
     const loadingMsgId = 'loading-' + Date.now();
-    addMessageToChat('AI', '思考中...', 'bot-message', loadingMsgId);
+    addMessageToChat('AI', 'Thinking...', 'bot-message', loadingMsgId);
     
     try {
         sendBtn.disabled = true;
+        const apiUrl = getApiUrl();
         
-        const response = await fetch(currentConfig.baseUrl, {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -159,6 +172,8 @@ async function sendMessage() {
             // Add to message history
             messageHistory.push({ role: 'assistant', content: botMessage });
         } else {
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
@@ -169,7 +184,7 @@ async function sendMessage() {
         if (loadingMsg) loadingMsg.remove();
         
         // Show error message
-        addMessageToChat('系统', '发送消息时出错: ' + error.message, 'bot-message');
+        addMessageToChat('System', 'Error sending message: ' + error.message, 'error-message');
     } finally {
         sendBtn.disabled = false;
     }
