@@ -60,12 +60,16 @@ async function checkAPIConnection() {
         const apiUrl = getApiUrl();
         console.log('Sending test request to:', apiUrl);
         
+        // Add mode: 'cors' and credentials: 'omit' to handle CORS properly
         const response = await fetch(apiUrl, {
             method: 'POST',
+            mode: 'cors',
+            credentials: 'omit',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentConfig.apiKey}`,
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Origin': window.location.origin
             },
             body: JSON.stringify({
                 messages: [{ role: 'user', content: 'Test connection' }],
@@ -90,8 +94,23 @@ async function checkAPIConnection() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
-        console.error('API connection error:', error);
-        updateAPIStatus('error', 'Connection failed. Check console for details.');
+        console.error('API connection error details:', {
+            message: error.message,
+            type: error.name,
+            stack: error.stack
+        });
+        
+        // More specific error message based on error type
+        let errorMessage = 'Connection failed. ';
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Unable to reach the API server. Please check if the server is running and accessible.';
+        } else if (error.message.includes('CORS')) {
+            errorMessage += 'CORS error detected. Please ensure the API server allows requests from this origin.';
+        } else {
+            errorMessage += error.message;
+        }
+        
+        updateAPIStatus('error', errorMessage);
         startBtn.disabled = true;
         sendBtn.disabled = true;
         userInput.disabled = true;
@@ -147,12 +166,16 @@ async function sendMessage() {
         sendBtn.disabled = true;
         const apiUrl = getApiUrl();
         
+        // Add mode: 'cors' and credentials: 'omit' to handle CORS properly
         const response = await fetch(apiUrl, {
             method: 'POST',
+            mode: 'cors',
+            credentials: 'omit',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentConfig.apiKey}`,
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Origin': window.location.origin
             },
             body: JSON.stringify({
                 messages: [
@@ -196,7 +219,11 @@ async function sendMessage() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error sending message:', {
+            message: error.message,
+            type: error.name,
+            stack: error.stack
+        });
         
         // Remove loading message
         const loadingMsg = document.getElementById(loadingMsgId);
