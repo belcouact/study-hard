@@ -13,7 +13,7 @@ const platformConfig = {
     'ark': {
         apiKey: '3654c0c8-acfd-469e-a1a4-eca3a9a95a5e',
         // Instead of using localhost, we'll use a Cloudflare Worker URL
-        baseUrl: 'https://YOUR_CLOUDFLARE_WORKER_URL', // You'll need to replace this with your Worker URL
+        baseUrl: 'ark-ds.5525899.workers.dev', // You'll need to replace this with your Worker URL
         model: 'bot-20250301110252-phnr8'
     }
 };
