@@ -89,20 +89,71 @@
             background-color: #f8d7da;
             margin-top: 10px;
         }
+        .section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .image-result {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .image-result img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .input-section {
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>DeepSeek Worker Test</h1>
-        <div class="input-section">
-            <textarea id="promptInput" placeholder="Enter your prompt here...">Hello, DeepSeek!</textarea>
-            <button id="submitBtn" onclick="handleSubmit()">Send Request</button>
+        <h1>AI Assistant</h1>
+        
+        <!-- Text Generation Section -->
+        <div class="section">
+            <h2>Text Generation</h2>
+            <div class="input-section">
+                <textarea id="promptInput" placeholder="Enter your prompt here..."></textarea>
+                <button id="submitBtn" onclick="handleSubmit()">Generate Text</button>
+            </div>
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Generating response...</p>
+            </div>
+            <div id="error" class="error" style="display: none;"></div>
+            <div id="responseContent" class="response-content"></div>
         </div>
-        <div id="loading" class="loading"></div>
-        <div id="error" class="error" style="display: none;"></div>
-        <div id="response" class="response-section">
-            <h2>Response:</h2>
-            <pre id="responseContent"></pre>
+
+        <!-- Image Generation Section -->
+        <div class="section">
+            <h2>Image Generation</h2>
+            <div class="input-section">
+                <textarea id="imagePromptInput" placeholder="Describe the image you want to generate..."></textarea>
+                <button id="generateImageBtn" onclick="handleImageGeneration()">Generate Image</button>
+            </div>
+            <div id="imageLoading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Generating image...</p>
+            </div>
+            <div id="imageError" class="error" style="display: none;"></div>
+            <div id="imageResult" class="image-result"></div>
         </div>
     </div>
 
@@ -111,6 +162,7 @@
         // Environment variables from config.js
         const DS_URL = window._env.ds_url;
         const DS_KEY = window._env.ds_key;
+        const IMG_URL = "https://txt-2-img.5525899.workers.dev";
 
         if (!DS_URL || !DS_KEY) {
             console.error('Environment variables not properly configured. Please check config.js');
@@ -198,6 +250,62 @@
                 // Re-enable button and hide loading
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
+            }
+        }
+
+        async function handleImageGeneration() {
+            const generateImageBtn = document.getElementById('generateImageBtn');
+            const imageLoading = document.getElementById('imageLoading');
+            const imageError = document.getElementById('imageError');
+            const imageResult = document.getElementById('imageResult');
+            const imagePromptInput = document.getElementById('imagePromptInput');
+
+            // Reset UI
+            imageError.style.display = 'none';
+            imageResult.innerHTML = '';
+            
+            // Validate input
+            if (!imagePromptInput.value.trim()) {
+                imageError.textContent = 'Please enter a description for the image';
+                imageError.style.display = 'block';
+                return;
+            }
+
+            // Disable button and show loading
+            generateImageBtn.disabled = true;
+            imageLoading.style.display = 'block';
+
+            try {
+                const response = await fetch(IMG_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        prompt: imagePromptInput.value.trim()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Image generation response:', result);
+
+                // Display the generated image
+                if (result.image_url) {
+                    imageResult.innerHTML = `<img src="${result.image_url}" alt="Generated image" style="max-width: 100%; height: auto;">`;
+                } else {
+                    throw new Error('No image URL in response');
+                }
+            } catch (err) {
+                imageError.textContent = `Error: ${err.message}`;
+                imageError.style.display = 'block';
+            } finally {
+                // Re-enable button and hide loading
+                generateImageBtn.disabled = false;
+                imageLoading.style.display = 'none';
             }
         }
 
