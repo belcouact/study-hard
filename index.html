@@ -142,10 +142,10 @@
                 const result = await response.json();
                 
                 // Format the response for better display
-                if (typeof result === 'object') {
-                    return JSON.stringify(result, null, 2);
+                if (result.choices && result.choices[0]?.message?.content) {
+                    return result.choices[0].message.content;
                 }
-                return result;
+                return JSON.stringify(result, null, 2);
             } catch (error) {
                 console.error('Worker call error:', error);
                 throw error;
@@ -169,7 +169,8 @@
 
             try {
                 const result = await callWorker(promptInput.value);
-                responseContent.textContent = result;
+                // Format the response with proper styling
+                responseContent.innerHTML = result.replace(/\n/g, '<br>');
             } catch (err) {
                 error.textContent = `Error: ${err.message}`;
                 error.style.display = 'block';
@@ -179,6 +180,13 @@
                 loading.style.display = 'none';
             }
         }
+
+        // Add message port error handling
+        window.addEventListener('error', function(event) {
+            if (event.message.includes('message port closed')) {
+                console.warn('Message port closed - this is usually not a critical error');
+            }
+        });
 
         // Allow Enter key to submit (Shift+Enter for new line)
         document.getElementById('promptInput').addEventListener('keydown', function(e) {
