@@ -106,10 +106,15 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
-        // Environment variables
-        const DS_URL = process.env.ds_url;
-        const DS_KEY = process.env.ds_key;
+        // Environment variables from config.js
+        const DS_URL = window._env.ds_url;
+        const DS_KEY = window._env.ds_key;
+
+        if (!DS_URL || !DS_KEY) {
+            console.error('Environment variables not properly configured. Please check config.js');
+        }
 
         async function callWorker(prompt) {
             try {
