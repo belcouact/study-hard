@@ -148,8 +148,8 @@
             try {
                 const result = await callWorker(promptInput.value);
                 responseContent.textContent = JSON.stringify(result, null, 2);
-            } catch (error) {
-                error.textContent = `Error: ${error.message}`;
+            } catch (err) {
+                error.textContent = `Error: ${err.message}`;
                 error.style.display = 'block';
             } finally {
                 // Re-enable button and hide loading
