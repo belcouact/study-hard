@@ -8,7 +8,7 @@ if (!DS_URL || !DS_KEY) {
 }
 
 // Text Generation Functions
-async function callWorker(prompt) {
+async function handleChatOutput(prompt) {
     try {
         // Validate input
         if (!prompt || prompt.trim() === '') {
@@ -98,7 +98,7 @@ async function handleSubmit() {
     loading.style.display = 'block';
 
     try {
-        const result = await callWorker(promptInput.value);
+        const result = await handleChatOutput(promptInput.value);
         showModal('Text Generation Result', result.replace(/\n/g, '<br>'));
     } catch (err) {
         error.textContent = `Error: ${err.message}`;
