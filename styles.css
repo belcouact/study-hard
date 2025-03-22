@@ -442,6 +442,9 @@ button:disabled {
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     padding: 40px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .xiaohongshu-style .svg-content {
@@ -450,11 +453,30 @@ button:disabled {
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
     border: 1px solid rgba(0,0,0,0.05);
     padding: 40px;
-    min-height: 400px;
+    min-height: 500px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
 }
 
 .xiaohongshu-style .svg-content svg {
     filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+}
+
+.xiaohongshu-style .svg-content text {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 24px;
+    line-height: 1.5;
+}
+
+.xiaohongshu-style .svg-content text.title {
+    font-size: 36px;
+    font-weight: bold;
 }
 
 .xiaohongshu-style .control-btn {
