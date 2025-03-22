@@ -443,7 +443,7 @@ button:disabled {
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     padding: 40px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
@@ -465,18 +465,28 @@ button:disabled {
     filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
     width: 100%;
     height: auto;
-    max-width: 100%;
+    max-width: 1200px;
+    min-width: 800px;
 }
 
 .xiaohongshu-style .svg-content text {
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 24px;
-    line-height: 1.5;
+    line-height: 1.8;
+    letter-spacing: 0.5px;
 }
 
 .xiaohongshu-style .svg-content text.title {
     font-size: 36px;
     font-weight: bold;
+    line-height: 1.4;
+}
+
+.xiaohongshu-style .svg-content text.paragraph {
+    font-size: 24px;
+    line-height: 1.8;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 .xiaohongshu-style .control-btn {
