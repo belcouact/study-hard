@@ -22,7 +22,6 @@
                 <p>Generating response...</p>
             </div>
             <div id="error" class="error" style="display: none;"></div>
-            <div id="responseContent" class="response-content"></div>
         </div>
 
         <!-- Image Generation Section -->
@@ -37,7 +36,19 @@
                 <p>Generating image...</p>
             </div>
             <div id="imageError" class="error" style="display: none;"></div>
-            <div id="imageResult" class="image-result"></div>
+        </div>
+    </div>
+
+    <!-- Popup Modal -->
+    <div id="popupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Response</h2>
+                <span class="close-button" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalContent">
+                <!-- Content will be inserted here -->
+            </div>
         </div>
     </div>
 

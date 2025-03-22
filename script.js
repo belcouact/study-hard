@@ -60,16 +60,38 @@ async function callWorker(prompt) {
     }
 }
 
+// Modal Functions
+function showModal(title, content) {
+    const modal = document.getElementById('popupModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+
+    modalTitle.textContent = title;
+    modalContent.innerHTML = content;
+    modal.style.display = 'block';
+
+    // Close modal when clicking outside
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+}
+
+function closeModal() {
+    const modal = document.getElementById('popupModal');
+    modal.style.display = 'none';
+}
+
+// Update handleSubmit function
 async function handleSubmit() {
     const submitBtn = document.getElementById('submitBtn');
     const loading = document.getElementById('loading');
     const error = document.getElementById('error');
-    const responseContent = document.getElementById('responseContent');
     const promptInput = document.getElementById('promptInput');
 
     // Reset UI
     error.style.display = 'none';
-    responseContent.textContent = '';
     
     // Disable button and show loading
     submitBtn.disabled = true;
@@ -77,7 +99,7 @@ async function handleSubmit() {
 
     try {
         const result = await callWorker(promptInput.value);
-        responseContent.innerHTML = result.replace(/\n/g, '<br>');
+        showModal('Text Generation Result', result.replace(/\n/g, '<br>'));
     } catch (err) {
         error.textContent = `Error: ${err.message}`;
         error.style.display = 'block';
@@ -88,17 +110,15 @@ async function handleSubmit() {
     }
 }
 
-// Image Generation Functions
+// Update handleImageGeneration function
 async function handleImageGeneration() {
     const generateImageBtn = document.getElementById('generateImageBtn');
     const imageLoading = document.getElementById('imageLoading');
     const imageError = document.getElementById('imageError');
-    const imageResult = document.getElementById('imageResult');
     const imagePromptInput = document.getElementById('imagePromptInput');
 
     // Reset UI
     imageError.style.display = 'none';
-    imageResult.innerHTML = '';
     
     // Validate input
     if (!imagePromptInput.value.trim()) {
@@ -133,14 +153,16 @@ async function handleImageGeneration() {
         // Create an object URL from the blob
         const imageUrl = URL.createObjectURL(blob);
         
-        // Display the image
-        imageResult.innerHTML = `<img src="${imageUrl}" alt="Generated image" style="max-width: 100%; height: auto;">`;
+        // Show the image in modal
+        showModal('Generated Image', `<img src="${imageUrl}" alt="Generated image">`);
         
-        // Clean up the object URL when the image is loaded
-        const img = imageResult.querySelector('img');
-        img.onload = () => {
+        // Clean up the object URL when the modal is closed
+        const modal = document.getElementById('popupModal');
+        const cleanup = () => {
             URL.revokeObjectURL(imageUrl);
+            modal.removeEventListener('click', cleanup);
         };
+        modal.addEventListener('click', cleanup);
     } catch (err) {
         imageError.textContent = `Error: ${err.message}`;
         imageError.style.display = 'block';
