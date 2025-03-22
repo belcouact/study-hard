@@ -193,41 +193,72 @@ async function handleSvgGeneration() {
         
         // Create a new window for SVG display
         const svgWindow = window.open('', '_blank');
-        svgWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Generated SVG</title>
-                <style>
-                    body {
-                        margin: 0;
-                        padding: 20px;
-                        background-color: #f5f5f5;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        min-height: 100vh;
-                    }
-                    .svg-container {
-                        background: white;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    svg {
-                        max-width: 100%;
-                        height: auto;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="svg-container">
-                    ${result}
-                </div>
-            </body>
-            </html>
-        `);
-        svgWindow.document.close();
+        
+        // Check if popup was blocked
+        if (!svgWindow || svgWindow.closed || typeof svgWindow.closed === 'undefined') {
+            throw new Error('Popup was blocked. Please allow popups for this site and try again.');
+        }
+
+        // Wait for the window to load
+        svgWindow.onload = function() {
+            svgWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Generated SVG</title>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 20px;
+                            background-color: #f5f5f5;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                        }
+                        .svg-container {
+                            background: white;
+                            padding: 20px;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }
+                        svg {
+                            max-width: 100%;
+                            height: auto;
+                        }
+                        .controls {
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            display: flex;
+                            gap: 10px;
+                        }
+                        .control-btn {
+                            padding: 8px 16px;
+                            background-color: #007bff;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                        }
+                        .control-btn:hover {
+                            background-color: #0056b3;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="controls">
+                        <button class="control-btn" onclick="window.print()">Print</button>
+                        <button class="control-btn" onclick="window.close()">Close</button>
+                    </div>
+                    <div class="svg-container">
+                        ${result}
+                    </div>
+                </body>
+                </html>
+            `);
+            svgWindow.document.close();
+        };
     } catch (err) {
         error.textContent = `Error: ${err.message}`;
         error.style.display = 'block';
