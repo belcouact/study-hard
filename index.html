@@ -123,6 +123,10 @@
                     throw new Error('Please enter a valid prompt');
                 }
 
+                // Log the request details
+                console.log('Sending request with prompt:', prompt.trim());
+                console.log('Request URL:', DS_URL);
+
                 const response = await fetch(DS_URL, {
                     method: "POST",
                     headers: {
@@ -134,12 +138,18 @@
                     })
                 });
 
+                // Log the response status
+                console.log('Response status:', response.status);
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
                 }
 
                 const result = await response.json();
+                
+                // Log the raw response
+                console.log('Raw API response:', result);
                 
                 // Format the response for better display
                 if (result.choices && result.choices[0]?.message?.content) {
