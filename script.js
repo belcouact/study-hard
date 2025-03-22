@@ -191,74 +191,21 @@ async function handleSvgGeneration() {
         // Get SVG code from API
         const result = await handleChatOutput(promptInput.value);
         
-        // Create a new window for SVG display
-        const svgWindow = window.open('', '_blank');
-        
-        // Check if popup was blocked
-        if (!svgWindow || svgWindow.closed || typeof svgWindow.closed === 'undefined') {
-            throw new Error('Popup was blocked. Please allow popups for this site and try again.');
-        }
+        // Create a container for the SVG with controls
+        const svgContent = `
+            <div class="svg-container">
+                <div class="svg-controls">
+                    <button class="control-btn" onclick="printSvg()">Print</button>
+                    <button class="control-btn" onclick="downloadSvg()">Download</button>
+                </div>
+                <div class="svg-content">
+                    ${result}
+                </div>
+            </div>
+        `;
 
-        // Wait for the window to load
-        svgWindow.onload = function() {
-            svgWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Generated SVG</title>
-                    <style>
-                        body {
-                            margin: 0;
-                            padding: 20px;
-                            background-color: #f5f5f5;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            min-height: 100vh;
-                        }
-                        .svg-container {
-                            background: white;
-                            padding: 20px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        }
-                        svg {
-                            max-width: 100%;
-                            height: auto;
-                        }
-                        .controls {
-                            position: fixed;
-                            top: 20px;
-                            right: 20px;
-                            display: flex;
-                            gap: 10px;
-                        }
-                        .control-btn {
-                            padding: 8px 16px;
-                            background-color: #007bff;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            cursor: pointer;
-                        }
-                        .control-btn:hover {
-                            background-color: #0056b3;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="controls">
-                        <button class="control-btn" onclick="window.print()">Print</button>
-                        <button class="control-btn" onclick="window.close()">Close</button>
-                    </div>
-                    <div class="svg-container">
-                        ${result}
-                    </div>
-                </body>
-                </html>
-            `);
-            svgWindow.document.close();
-        };
+        // Show the SVG in the modal
+        showModal('Generated SVG', svgContent);
     } catch (err) {
         error.textContent = `Error: ${err.message}`;
         error.style.display = 'block';
@@ -267,6 +214,63 @@ async function handleSvgGeneration() {
         createSvgBtn.disabled = false;
         loading.style.display = 'none';
     }
+}
+
+// SVG Utility Functions
+function printSvg() {
+    const printWindow = window.open('', '_blank');
+    const svgContent = document.querySelector('.svg-content').innerHTML;
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Print SVG</title>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 20px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                }
+                .svg-container {
+                    background: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                svg {
+                    max-width: 100%;
+                    height: auto;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="svg-container">
+                ${svgContent}
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = function() {
+        printWindow.print();
+    };
+}
+
+function downloadSvg() {
+    const svgContent = document.querySelector('.svg-content').innerHTML;
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'generated.svg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // Event Listeners
