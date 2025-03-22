@@ -287,18 +287,24 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
                 }
 
-                const result = await response.json();
-                console.log('Image generation response:', result);
-
-                // Display the generated image
-                if (result.image_url) {
-                    imageResult.innerHTML = `<img src="${result.image_url}" alt="Generated image" style="max-width: 100%; height: auto;">`;
-                } else {
-                    throw new Error('No image URL in response');
-                }
+                // Get the image as a blob
+                const blob = await response.blob();
+                
+                // Create an object URL from the blob
+                const imageUrl = URL.createObjectURL(blob);
+                
+                // Display the image
+                imageResult.innerHTML = `<img src="${imageUrl}" alt="Generated image" style="max-width: 100%; height: auto;">`;
+                
+                // Clean up the object URL when the image is loaded
+                const img = imageResult.querySelector('img');
+                img.onload = () => {
+                    URL.revokeObjectURL(imageUrl);
+                };
             } catch (err) {
                 imageError.textContent = `Error: ${err.message}`;
                 imageError.style.display = 'block';
