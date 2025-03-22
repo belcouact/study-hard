@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek Worker Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .response-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .response-section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DeepSeek Worker Test</h1>
+        <div class="input-section">
+            <textarea id="promptInput" placeholder="Enter your prompt here...">Hello, DeepSeek!</textarea>
+            <button id="submitBtn" onclick="handleSubmit()">Send Request</button>
+        </div>
+        <div id="loading" class="loading"></div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="response" class="response-section">
+            <h2>Response:</h2>
+            <pre id="responseContent"></pre>
+        </div>
+    </div>
+
+    <script>
+        async function callWorker(prompt) {
+            try {
+                const response = await fetch("https://ark-ds.workers.dev/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function handleSubmit() {
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const responseContent = document.getElementById('responseContent');
+            const promptInput = document.getElementById('promptInput');
+
+            // Reset UI
+            error.style.display = 'none';
+            responseContent.textContent = '';
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                const result = await callWorker(promptInput.value);
+                responseContent.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                error.textContent = `Error: ${error.message}`;
+                error.style.display = 'block';
+            } finally {
+                // Re-enable button and hide loading
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        // Allow Enter key to submit (Shift+Enter for new line)
+        document.getElementById('promptInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+            }
+        });
+    </script>
+</body>
+</html> 
