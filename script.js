@@ -188,18 +188,40 @@ async function handleSvgGeneration() {
     loading.style.display = 'block';
 
     try {
-        // Get SVG code from API
-        const result = await handleChatOutput(promptInput.value);
+        // Step 1: Get SVG design suggestion
+        const designPrompt = `Based on this content: "${promptInput.value}", suggest a detailed SVG design. Include:
+        1. Overall layout and composition
+        2. Key visual elements and their arrangement
+        3. Color scheme and style
+        4. Any specific SVG features to use (gradients, filters, animations, etc.)
+        Format the response as a clear, structured design plan.`;
+
+        const designSuggestion = await handleChatOutput(designPrompt);
         
-        // Create a container for the SVG with controls
+        // Step 2: Generate SVG code based on the design suggestion
+        const svgPrompt = `Create SVG code for this design: "${designSuggestion}"
+        Requirements:
+        1. Use proper SVG syntax and best practices
+        2. Include all necessary attributes and styles
+        3. Make it responsive and scalable
+        4. Optimize for performance
+        Return ONLY the SVG code without any explanations.`;
+
+        const svgCode = await handleChatOutput(svgPrompt);
+        
+        // Step 3: Create and display the SVG
         const svgContent = `
             <div class="svg-container">
                 <div class="svg-controls">
                     <button class="control-btn" onclick="printSvg()">Print</button>
                     <button class="control-btn" onclick="downloadSvg()">Download</button>
                 </div>
+                <div class="design-suggestion">
+                    <h3>Design Suggestion:</h3>
+                    <pre>${designSuggestion}</pre>
+                </div>
                 <div class="svg-content">
-                    ${result}
+                    ${svgCode}
                 </div>
             </div>
         `;
