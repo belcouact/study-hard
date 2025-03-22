@@ -15,7 +15,10 @@
             <h2>Text Generation</h2>
             <div class="input-section">
                 <textarea id="promptInput" placeholder="Enter your prompt here..."></textarea>
-                <button id="submitBtn" onclick="handleSubmit()">Generate Text</button>
+                <div class="button-group">
+                    <button id="submitBtn" onclick="handleSubmit()">Generate Text</button>
+                    <button id="createSvgBtn" onclick="handleSvgGeneration()">Create SVG</button>
+                </div>
             </div>
             <div id="loading" class="loading" style="display: none;">
                 <div class="spinner"></div>

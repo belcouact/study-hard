@@ -173,6 +173,71 @@ async function handleImageGeneration() {
     }
 }
 
+// SVG Generation Functions
+async function handleSvgGeneration() {
+    const createSvgBtn = document.getElementById('createSvgBtn');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const promptInput = document.getElementById('promptInput');
+
+    // Reset UI
+    error.style.display = 'none';
+    
+    // Disable button and show loading
+    createSvgBtn.disabled = true;
+    loading.style.display = 'block';
+
+    try {
+        // Get SVG code from API
+        const result = await handleChatOutput(promptInput.value);
+        
+        // Create a new window for SVG display
+        const svgWindow = window.open('', '_blank');
+        svgWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Generated SVG</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #f5f5f5;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                    }
+                    .svg-container {
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    svg {
+                        max-width: 100%;
+                        height: auto;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="svg-container">
+                    ${result}
+                </div>
+            </body>
+            </html>
+        `);
+        svgWindow.document.close();
+    } catch (err) {
+        error.textContent = `Error: ${err.message}`;
+        error.style.display = 'block';
+    } finally {
+        // Re-enable button and hide loading
+        createSvgBtn.disabled = false;
+        loading.style.display = 'none';
+    }
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Add message port error handling
@@ -189,7 +254,11 @@ document.addEventListener('DOMContentLoaded', function() {
     promptInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleSubmit();
+            if (e.ctrlKey) {
+                handleSvgGeneration();
+            } else {
+                handleSubmit();
+            }
         }
     });
 
