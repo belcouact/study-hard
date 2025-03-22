@@ -112,7 +112,8 @@
                 const response = await fetch("https://ark-ds.5525899.workers.dev", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer sk-db4f7c2e3c99454da5a799b92a0c9f9c"  // Replace with your actual API key
                     },
                     body: JSON.stringify({
                         prompt: prompt
