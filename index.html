@@ -134,7 +134,13 @@
                         "Authorization": `Bearer ${DS_KEY}`
                     },
                     body: JSON.stringify({
-                        prompt: prompt.trim()
+                        messages: [{
+                            role: "user",
+                            content: prompt.trim()
+                        }],
+                        model: "deepseek-chat",
+                        temperature: 0.7,
+                        max_tokens: 1000
                     })
                 });
 
@@ -154,6 +160,10 @@
                 // Format the response for better display
                 if (result.choices && result.choices[0]?.message?.content) {
                     return result.choices[0].message.content;
+                } else if (result.content) {
+                    return result.content;
+                } else if (typeof result === 'string') {
+                    return result;
                 }
                 return JSON.stringify(result, null, 2);
             } catch (error) {
