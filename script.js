@@ -188,45 +188,38 @@ async function handleSvgGeneration() {
     loading.style.display = 'block';
 
     try {
-        // Step 1: Get SVG design suggestion in Chinese
-        const designPrompt = `基于以下内容："${promptInput.value}"，请提供一个详细的SVG设计建议。要求：
-        1. 整体布局和构图设计
-        2. 主要视觉元素及其排列方式
-        3. 配色方案和风格建议
-        4. 建议使用的SVG特效（渐变、滤镜、动画等）
-        5. 如何突出主题和重点
-        6. 如何确保设计感强且美观
-        请用中文详细说明，并确保设计建议具有创意性和实用性。`;
-
-        const designSuggestion = await handleChatOutput(designPrompt);
-        
-        // Step 2: Generate SVG code with improved design
-        const svgPrompt = `根据以下设计建议创建SVG代码："${designSuggestion}"
+        // Generate SVG code with Xiaohongshu style
+        const svgPrompt = `根据以下内容创建小红书风格的SVG设计："${promptInput.value}"
         要求：
-        1. 使用标准的SVG语法和最佳实践
-        2. 包含所有必要的属性和样式
-        3. 确保响应式设计和可扩展性
-        4. 优化性能
-        5. 添加适当的背景和装饰元素
-        6. 使用渐变色和滤镜增强视觉效果
-        7. 确保整体设计明亮、现代且富有设计感
-        8. 添加适当的阴影和光效
-        9. 确保所有文字清晰可读
-        10. 添加适当的动画效果
+        1. 采用小红书流行的设计风格：
+           - 清新、明亮、温暖的色调
+           - 圆润的边角和柔和的阴影
+           - 简约但不失设计感的布局
+           - 适当使用渐变色和光效
+        2. 设计元素：
+           - 使用现代简约的图形元素
+           - 添加精致的装饰细节
+           - 确保视觉层次分明
+           - 突出主题内容
+        3. 技术实现：
+           - 使用标准的SVG语法
+           - 添加平滑的动画效果
+           - 确保响应式设计
+           - 优化性能
+        4. 配色方案：
+           - 主色调：温暖明亮的色调
+           - 强调色：活泼的点缀色
+           - 背景：清新柔和的渐变
         请直接返回SVG代码，不要包含任何解释。`;
 
         const svgCode = await handleChatOutput(svgPrompt);
         
-        // Step 3: Create and display the SVG with Chinese labels
+        // Create and display the SVG with Xiaohongshu style
         const svgContent = `
-            <div class="svg-container">
+            <div class="svg-container xiaohongshu-style">
                 <div class="svg-controls">
                     <button class="control-btn" onclick="printSvg()">打印</button>
                     <button class="control-btn" onclick="downloadSvg()">下载</button>
-                </div>
-                <div class="design-suggestion">
-                    <h3>设计建议：</h3>
-                    <pre>${designSuggestion}</pre>
                 </div>
                 <div class="svg-content">
                     ${svgCode}
@@ -234,8 +227,8 @@ async function handleSvgGeneration() {
             </div>
         `;
 
-        // Show the SVG in the modal with Chinese title
-        showModal('生成的SVG设计', svgContent);
+        // Show the SVG in the modal
+        showModal('小红书风格设计', svgContent);
     } catch (err) {
         error.textContent = `错误：${err.message}`;
         error.style.display = 'block';
