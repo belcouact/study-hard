@@ -1,7 +1,7 @@
 // Environment variables from config.js
 const DS_URL = window._env.ds_url;
 const DS_KEY = window._env.ds_key;
-const IMG_URL = "https://txt-2-img.5525899.workers.dev";
+const IMG_URL = "https://sd-tti-api.study-llm.me";
 
 if (!DS_URL || !DS_KEY) {
     console.error('Environment variables not properly configured. Please check config.js');
